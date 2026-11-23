@@ -23,8 +23,8 @@
 
 Writing accurate CSP headers by hand is error-prone and most developers default to unsafe rules that leave their applications exposed. PHP CSP Audit closes the gap by recursively scanning your PHP project, detecting real resource usage through regex analysis, and emitting a strict, ready-to-paste CSP header.
 
-- Automatically discovers external scripts, stylesheets, images, fonts and connection endpoints
-- Produces a tight baseline policy with smart defaults (`'self'`, `'unsafe-inline'` for styles, `data:` for images)
+- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints and inline `<script>` and `<style>` tags
+- Produces a tight baseline policy with smart defaults (`'self'`, conditionally `'unsafe-inline'` for scripts and styles, `data:` for images)
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
 - Helps prevent XSS by showing you exactly what your application actually loads
 
@@ -43,7 +43,7 @@ Writing accurate CSP headers by hand is error-prone and most developers default 
 <tr>
 <td align="center">📦<br><b>Zero deps</b><br>Single-file PHP 8+ script that runs anywhere with zero installation</td>
 <td align="center">⚡<br><b>Fast &amp; CI-ready</b><br>Completes in seconds and prints a header you can paste directly into .htaccess</td>
-<td align="center">🎨<br><b>Smart defaults</b><br>Always includes 'unsafe-inline' for styles and data: for images</td>
+<td align="center">🎨<br><b>Smart defaults</b><br>Conditionally includes 'unsafe-inline' for script and style when inline tags detected + data: for images</td>
 </tr>
 </table>
 
@@ -109,13 +109,13 @@ flowchart TD
     CLI[$argv[1] or getcwd()] --> RII[RecursiveIteratorIterator + RecursiveDirectoryIterator]
     RII --> Filter[Filter by extension: html, htm, php, js, css]
     Filter --> Read[file_get_contents]
-    Read --> Regex[preg_match_all for script, link[rel=stylesheet], img, url()]
-    Regex --> Sources[Aggregate into $sources array]
-    Sources --> Builder[Build $csp string with fixed defaults]
+    Read --> Regex[preg_match_all for resources + inline script/style]
+    Regex --> Sources[Aggregate into $sources + $hasInline* flags]
+    Sources --> Builder[Build $csp string with conditional unsafe-inline]
     Builder --> Echo[echo $csp]
 ```
 
-The entire tool lives in a single self-contained `csp-audit.php` file. It uses PHP’s built-in filesystem and regex functions to discover resources, then constructs a CSP header that balances security with functionality using opinionated but practical defaults.
+The entire tool lives in a single self-contained `csp-audit.php` file. It uses PHP’s built-in filesystem and regex functions to discover external resources and detect inline `<script>` and `<style>` tags, then constructs a CSP header that balances security with functionality using opinionated but practical defaults.
 
 ## 📁 Project structure
 
@@ -158,7 +158,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 ## 📍 Roadmap
 <!-- roadmap:start -->
 - [x] Add PHPUnit tests that assert generated CSP for fixture directories
-- [ ] Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'
+- [x] Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'
 - [ ] Add --json flag that outputs discovered resources instead of CSP string
 - [ ] Support --nonce flag that prints a random nonce and example meta tags
 - [ ] Extract hostnames only (instead of full paths) for external resources

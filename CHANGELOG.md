@@ -6,3 +6,7 @@ All notable changes to this project are documented here, following [Keep a Chang
 ### Changed
 
 - Add PHPUnit tests that assert generated CSP for fixture directories
+
+### Added
+
+- Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'

@@ -18,7 +18,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
         $this->assertEquals($expected, $output);
     }
 
@@ -28,7 +28,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self' https://example.com/app.js; style-src 'self' 'unsafe-inline' https://example.com/styles.css; img-src 'self' data: https://example.com/image.png local.jpg; font-src 'self' https://example.com/font.woff; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self' 'unsafe-inline' https://example.com/app.js; style-src 'self' 'unsafe-inline' https://example.com/styles.css; img-src 'self' data: https://example.com/image.png local.jpg; font-src 'self' https://example.com/font.woff; connect-src 'self';";
         $this->assertEquals($expected, $output);
     }
 }
