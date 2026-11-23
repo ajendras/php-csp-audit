@@ -1,0 +1,14 @@
+{
+  "name": "ajendras/php-csp-audit",
+  "description": "Zero-dep PHP CLI that discovers scripts & assets and generates CSP in seconds",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "scripts": {
+    "test": "phpunit"
+  }
+}

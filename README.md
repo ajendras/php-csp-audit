@@ -122,11 +122,21 @@ The entire tool lives in a single self-contained `csp-audit.php` file. It uses P
 ```text
 .
 ├── csp-audit.php                 # Main CLI script — does everything
+├── composer.json                 # PHPUnit dev dependency
+├── phpunit.xml                   # Test configuration
 ├── LICENSE
 ├── README.md
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
+├── tests/
+│   ├── bootstrap.php
+│   ├── CspAuditTest.php          # Asserts CSP output for fixture dirs
+│   └── fixtures/
+│       ├── empty/
+│       │   └── test.php
+│       └── with-resources/
+│           └── index.html
 └── .github/
     ├── ISSUE_TEMPLATE/
     │   ├── bug_report.md
@@ -137,14 +147,17 @@ The entire tool lives in a single self-contained `csp-audit.php` file. It uses P
 ## 🧪 Testing
 
 ```bash
-php -l csp-audit.php
+composer install
+vendor/bin/phpunit
 ```
 
-This syntax-checks the script. Because the tool is a single focused file, testing consists of running it against sample projects containing typical HTML/PHP/JS/CSS patterns to verify the generated CSP matches expected resource hosts.
+Runs the PHPUnit test suite. Tests scan fixture directories with known resources and assert that the generated CSP header exactly matches the expected policy string.
+
+The original `php -l csp-audit.php` syntax check is still performed by the CI workflow.
 
 ## 📍 Roadmap
 <!-- roadmap:start -->
-- [ ] Add PHPUnit tests that assert generated CSP for fixture directories
+- [x] Add PHPUnit tests that assert generated CSP for fixture directories
 - [ ] Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'
 - [ ] Add --json flag that outputs discovered resources instead of CSP string
 - [ ] Support --nonce flag that prints a random nonce and example meta tags
