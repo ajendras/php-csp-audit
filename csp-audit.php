@@ -2,10 +2,13 @@
 <?php
 $dir = getcwd();
 $json = false;
+$nonce = false;
 if (count($argv) > 1) {
   foreach (array_slice($argv, 1) as $arg) {
     if ($arg === '--json') {
       $json = true;
+    } elseif ($arg === '--nonce') {
+      $nonce = true;
     } elseif (is_dir($arg)) {
       $dir = $arg;
     }
@@ -27,7 +30,26 @@ foreach ($rii as $file) {
   if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $content)) $hasInlineStyle = true;
 }
 $sources = array_map('array_unique', $sources);
-if ($json) {
+if ($nonce) {
+  $nonceValue = rtrim(base64_encode(random_bytes(16)), '=');
+  echo 'Generated nonce: ' . $nonceValue . PHP_EOL . PHP_EOL;
+  $csp = "default-src 'self'; script-src 'self'".
+    ($hasInlineScript ? " 'nonce-$nonceValue'" : "").
+    (count($sources['script'])?' '.implode(' ',array_unique($sources['script'])):'').
+    "; style-src 'self'".
+    ($hasInlineStyle ? " 'nonce-$nonceValue'" : "").
+    (count($sources['style'])?' '.implode(' ',array_unique($sources['style'])):'').
+    "; img-src 'self' data:".
+    (count($sources['img'])?' '.implode(' ',array_unique($sources['img'])):'').
+    "; font-src 'self'".
+    (count($sources['font'])?' '.implode(' ',array_unique($sources['font'])):'').
+    "; connect-src 'self';";
+  echo "Example meta tag:" . PHP_EOL;
+  echo '<meta http-equiv="Content-Security-Policy" content="' . $csp . '">' . PHP_EOL . PHP_EOL;
+  echo "Add the nonce attribute to your inline <script> and <style> tags:" . PHP_EOL;
+  echo '  <script nonce="' . $nonceValue . '">...</script>' . PHP_EOL;
+  echo '  <style nonce="' . $nonceValue . '">...</style>' . PHP_EOL;
+} elseif ($json) {
   $data = [
     'sources' => $sources,
     'hasInlineScript' => $hasInlineScript,

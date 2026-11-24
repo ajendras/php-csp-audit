@@ -53,4 +53,22 @@ class CspAuditTest extends TestCase
         $this->assertEquals(['https://example.com/font.woff'], $sources['font']);
         $this->assertEquals([], $sources['connect']);
     }
+
+    public function testOutputsNonceAndExampleMetaTags()
+    {
+        $fixtureDir = __DIR__ . '/fixtures/with-resources';
+        $command = sprintf('php %s --nonce %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
+        $output = shell_exec($command) ?? '';
+
+        $this->assertStringContainsString('Generated nonce:', $output);
+        $this->assertStringContainsString('Example meta tag:', $output);
+        $this->assertStringContainsString('<meta http-equiv="Content-Security-Policy" content="', $output);
+        $this->assertStringContainsString("'nonce-", $output);
+        $this->assertStringContainsString('https://example.com/app.js', $output);
+        $this->assertStringContainsString('https://example.com/styles.css', $output);
+        $this->assertStringContainsString('<script nonce="', $output);
+        $this->assertStringContainsString('<style nonce="', $output);
+
+        $this->assertMatchesRegularExpression('/Generated nonce: [A-Za-z0-9+\/]{20,24}/', $output);
+    }
 }
