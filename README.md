@@ -23,7 +23,7 @@
 
 Writing accurate CSP headers by hand is error-prone and most developers default to unsafe rules that leave their applications exposed. PHP CSP Audit closes the gap by recursively scanning your PHP project, detecting real resource usage through regex analysis, and emitting a strict, ready-to-paste CSP header.
 
-- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints and inline `<script>` and `<style>` tags
+- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints (extracting only hostnames instead of full paths) and inline `<script>` and `<style>` tags
 - Produces a tight baseline policy with smart defaults (`'self'`, conditionally `'unsafe-inline'` for scripts and styles, `data:` for images)
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
 - `--json` flag outputs all discovered resources and inline flags as structured JSON
@@ -87,7 +87,7 @@ Save the header for use in `.htaccess` or server config:
 ./csp-audit.php /path/to/project > csp-header.txt
 ```
 
-Generate JSON with all discovered resources and inline flags:
+Generate JSON with all discovered resources and inline flags as structured JSON:
 
 ```bash
 ./csp-audit.php --json /path/to/project
@@ -177,7 +177,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'
 - [x] Add --json flag that outputs discovered resources instead of CSP string
 - [x] Support --nonce flag that prints a random nonce and example meta tags
-- [ ] Extract hostnames only (instead of full paths) for external resources
+- [x] Extract hostnames only (instead of full paths) for external resources
 - [ ] Add --ignore flag to skip directories like node_modules, vendor, dist
 - [ ] Improve regexes to avoid matching inside comments or strings
 - [ ] Add support for worker-src, frame-ancestors and object-src directives

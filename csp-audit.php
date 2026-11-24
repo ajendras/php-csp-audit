@@ -1,5 +1,12 @@
 #!/usr/bin/env php
 <?php
+function extractHostname($src) {
+  if (preg_match('~^((https?:)?//[^/]+)~i', $src, $m)) {
+    return $m[1];
+  }
+  return $src;
+}
+
 $dir = getcwd();
 $json = false;
 $nonce = false;
@@ -30,6 +37,9 @@ foreach ($rii as $file) {
   if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $content)) $hasInlineStyle = true;
 }
 $sources = array_map('array_unique', $sources);
+$sources = array_map(function($list) {
+  return array_unique(array_map('extractHostname', $list));
+}, $sources);
 if ($nonce) {
   $nonceValue = rtrim(base64_encode(random_bytes(16)), '=');
   echo 'Generated nonce: ' . $nonceValue . PHP_EOL . PHP_EOL;

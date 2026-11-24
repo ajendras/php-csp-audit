@@ -28,7 +28,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self' 'unsafe-inline' https://example.com/app.js; style-src 'self' 'unsafe-inline' https://example.com/styles.css; img-src 'self' data: https://example.com/image.png local.jpg; font-src 'self' https://example.com/font.woff; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self' 'unsafe-inline' https://example.com; style-src 'self' 'unsafe-inline' https://example.com; img-src 'self' data: https://example.com local.jpg; font-src 'self' https://example.com; connect-src 'self';";
         $this->assertEquals($expected, $output);
     }
 
@@ -47,10 +47,10 @@ class CspAuditTest extends TestCase
         $this->assertTrue($data['hasInlineStyle']);
 
         $sources = $data['sources'];
-        $this->assertEquals(['https://example.com/app.js'], $sources['script']);
-        $this->assertEquals(['https://example.com/styles.css'], $sources['style']);
-        $this->assertEquals(['https://example.com/image.png', 'local.jpg'], $sources['img']);
-        $this->assertEquals(['https://example.com/font.woff'], $sources['font']);
+        $this->assertEquals(['https://example.com'], $sources['script']);
+        $this->assertEquals(['https://example.com'], $sources['style']);
+        $this->assertEquals(['https://example.com', 'local.jpg'], $sources['img']);
+        $this->assertEquals(['https://example.com'], $sources['font']);
         $this->assertEquals([], $sources['connect']);
     }
 
@@ -64,8 +64,8 @@ class CspAuditTest extends TestCase
         $this->assertStringContainsString('Example meta tag:', $output);
         $this->assertStringContainsString('<meta http-equiv="Content-Security-Policy" content="', $output);
         $this->assertStringContainsString("'nonce-", $output);
-        $this->assertStringContainsString('https://example.com/app.js', $output);
-        $this->assertStringContainsString('https://example.com/styles.css', $output);
+        $this->assertStringContainsString('https://example.com', $output);
+        $this->assertStringContainsString('https://example.com', $output);
         $this->assertStringContainsString('<script nonce="', $output);
         $this->assertStringContainsString('<style nonce="', $output);
 
