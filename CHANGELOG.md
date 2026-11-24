@@ -9,4 +9,5 @@ All notable changes to this project are documented here, following [Keep a Chang
 
 ### Added
 
+- Add --json flag that outputs discovered resources instead of CSP string
 - Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'

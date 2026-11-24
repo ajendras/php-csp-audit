@@ -1,6 +1,16 @@
 #!/usr/bin/env php
 <?php
-$dir = $argv[1] ?? getcwd();
+$dir = getcwd();
+$json = false;
+if (count($argv) > 1) {
+  foreach (array_slice($argv, 1) as $arg) {
+    if ($arg === '--json') {
+      $json = true;
+    } elseif (is_dir($arg)) {
+      $dir = $arg;
+    }
+  }
+}
 $exts = ['html','htm','php','js','css'];
 $sources = ['script'=>[],'style'=>[],'img'=>[],'font'=>[],'connect'=>[]];
 $hasInlineScript = false;
@@ -16,15 +26,25 @@ foreach ($rii as $file) {
   if (preg_match('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', $content)) $hasInlineScript = true;
   if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $content)) $hasInlineStyle = true;
 }
-$csp = "default-src 'self'; script-src 'self'".
-  ($hasInlineScript ? " 'unsafe-inline'" : "").
-  (count($sources['script'])?' '.implode(' ',array_unique($sources['script'])):'').
-  "; style-src 'self'".
-  ($hasInlineStyle ? " 'unsafe-inline'" : "").
-  (count($sources['style'])?' '.implode(' ',array_unique($sources['style'])):'').
-  "; img-src 'self' data:".
-  (count($sources['img'])?' '.implode(' ',array_unique($sources['img'])):'').
-  "; font-src 'self'".
-  (count($sources['font'])?' '.implode(' ',array_unique($sources['font'])):'').
-  "; connect-src 'self';";
-echo $csp.PHP_EOL;
+$sources = array_map('array_unique', $sources);
+if ($json) {
+  $data = [
+    'sources' => $sources,
+    'hasInlineScript' => $hasInlineScript,
+    'hasInlineStyle' => $hasInlineStyle
+  ];
+  echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+} else {
+  $csp = "default-src 'self'; script-src 'self'".
+    ($hasInlineScript ? " 'unsafe-inline'" : "").
+    (count($sources['script'])?' '.implode(' ',array_unique($sources['script'])):'').
+    "; style-src 'self'".
+    ($hasInlineStyle ? " 'unsafe-inline'" : "").
+    (count($sources['style'])?' '.implode(' ',array_unique($sources['style'])):'').
+    "; img-src 'self' data:".
+    (count($sources['img'])?' '.implode(' ',array_unique($sources['img'])):'').
+    "; font-src 'self'".
+    (count($sources['font'])?' '.implode(' ',array_unique($sources['font'])):'').
+    "; connect-src 'self';";
+  echo $csp.PHP_EOL;
+}

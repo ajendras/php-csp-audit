@@ -26,6 +26,7 @@ Writing accurate CSP headers by hand is error-prone and most developers default 
 - Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints and inline `<script>` and `<style>` tags
 - Produces a tight baseline policy with smart defaults (`'self'`, conditionally `'unsafe-inline'` for scripts and styles, `data:` for images)
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
+- `--json` flag outputs all discovered resources and inline flags as structured JSON
 - Helps prevent XSS by showing you exactly what your application actually loads
 
 ## 🎬 Demo
@@ -84,6 +85,14 @@ Save the header for use in `.htaccess` or server config:
 ```bash
 ./csp-audit.php /path/to/project > csp-header.txt
 ```
+
+Generate JSON with all discovered resources and inline flags:
+
+```bash
+./csp-audit.php --json /path/to/project
+```
+
+The JSON contains a `sources` object (by directive) plus `hasInlineScript` and `hasInlineStyle` booleans. Useful for scripting, custom CSP logic or debugging.
 
 <details><summary>Using in a deployment script</summary>
 
@@ -159,7 +168,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 <!-- roadmap:start -->
 - [x] Add PHPUnit tests that assert generated CSP for fixture directories
 - [x] Detect inline <script> and <style> tags and conditionally add 'unsafe-inline'
-- [ ] Add --json flag that outputs discovered resources instead of CSP string
+- [x] Add --json flag that outputs discovered resources instead of CSP string
 - [ ] Support --nonce flag that prints a random nonce and example meta tags
 - [ ] Extract hostnames only (instead of full paths) for external resources
 - [ ] Add --ignore flag to skip directories like node_modules, vendor, dist
