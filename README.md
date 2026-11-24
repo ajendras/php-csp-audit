@@ -28,6 +28,7 @@ Writing accurate CSP headers by hand is error-prone and most developers default 
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
 - `--json` flag outputs all discovered resources and inline flags as structured JSON
 - `--nonce` flag that prints a random nonce and example meta tags for using nonces with inline content
+- `--ignore` flag to skip directories like `node_modules`, `vendor` and `dist`
 - Helps prevent XSS by showing you exactly what your application actually loads
 
 ## 🎬 Demo
@@ -81,6 +82,12 @@ Target a specific directory:
 ./csp-audit.php /var/www/my-app
 ```
 
+Ignore common dependency and build directories:
+
+```bash
+./csp-audit.php --ignore=node_modules,vendor,dist /var/www/my-app
+```
+
 Save the header for use in `.htaccess` or server config:
 
 ```bash
@@ -117,6 +124,16 @@ echo "Header set Content-Security-Policy \"$(./csp-audit.php /var/www/app | tr -
   run: ./csp-audit.php . > $GITHUB_WORKSPACE/csp.txt
 ```
 </details>
+
+## 🛠 Configuration
+
+The scanner skips `node_modules`, `vendor` and `dist` directories by default. You can customize this with the `--ignore` flag by providing a comma-separated list of directory names:
+
+```bash
+./csp-audit.php --ignore=node_modules,vendor,dist,build,cache .
+```
+
+This ensures only your own code affects the generated CSP policy.
 
 ## 🧩 Architecture
 
@@ -178,7 +195,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Add --json flag that outputs discovered resources instead of CSP string
 - [x] Support --nonce flag that prints a random nonce and example meta tags
 - [x] Extract hostnames only (instead of full paths) for external resources
-- [ ] Add --ignore flag to skip directories like node_modules, vendor, dist
+- [x] Add --ignore flag to skip directories like node_modules, vendor, dist
 - [ ] Improve regexes to avoid matching inside comments or strings
 - [ ] Add support for worker-src, frame-ancestors and object-src directives
 - [ ] Write a proper man-page style help output when no argument is given

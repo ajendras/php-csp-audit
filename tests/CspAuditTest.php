@@ -71,4 +71,15 @@ class CspAuditTest extends TestCase
 
         $this->assertMatchesRegularExpression('/Generated nonce: [A-Za-z0-9+\/]{20,24}/', $output);
     }
+
+    public function testIgnoreFlagSkipsDirectories()
+    {
+        $fixtureDir = __DIR__ . '/fixtures/with-resources';
+        // ignore the fixture directory itself to confirm skipping logic produces default CSP
+        $command = sprintf('php %s --ignore=with-resources %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
+        $output = trim(shell_exec($command) ?? '');
+
+        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
+        $this->assertEquals($expected, $output);
+    }
 }

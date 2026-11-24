@@ -5,6 +5,7 @@ All notable changes to this project are documented here, following [Keep a Chang
 ## [Unreleased]
 ### Added
 
+- Add --ignore flag (defaults to node_modules,vendor,dist) to skip irrelevant directories during scan
 - extract hostnames only (instead of full paths) for external resources
 
 ## [0.2.0] - 2026-11-24

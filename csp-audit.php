@@ -7,15 +7,29 @@ function extractHostname($src) {
   return $src;
 }
 
+function shouldIgnore($pathname, $ignores) {
+  $path = str_replace('\\', '/', $pathname);
+  foreach ($ignores as $dir) {
+    if ($dir && (strpos($path, '/' . $dir . '/') !== false || strpos($path, $dir . '/') === 0)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 $dir = getcwd();
 $json = false;
 $nonce = false;
+$ignores = ['node_modules', 'vendor', 'dist'];
 if (count($argv) > 1) {
   foreach (array_slice($argv, 1) as $arg) {
     if ($arg === '--json') {
       $json = true;
     } elseif ($arg === '--nonce') {
       $nonce = true;
+    } elseif (str_starts_with($arg, '--ignore=')) {
+      $val = substr($arg, 9);
+      $ignores = array_filter(array_map('trim', explode(',', $val)));
     } elseif (is_dir($arg)) {
       $dir = $arg;
     }
@@ -28,6 +42,7 @@ $hasInlineStyle = false;
 $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
 foreach ($rii as $file) {
   if ($file->isDir() || !in_array($file->getExtension(),$exts)) continue;
+  if (shouldIgnore($file->getPathname(), $ignores)) continue;
   $content = file_get_contents($file->getPathname());
   if (preg_match_all('/<script[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$content,$m)) $sources['script'] = array_merge($sources['script'],$m[1]);
   if (preg_match_all('/<link[^>]*href=["\']([^"\']+)["\'][^>]*rel=["\']stylesheet["\'][^>]*>/i',$content,$m)) $sources['style'] = array_merge($sources['style'],$m[1]);
