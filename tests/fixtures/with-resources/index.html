@@ -13,9 +13,13 @@
     <h1>Hello</h1>
     <img src="https://example.com/image.png" alt="test">
     <img src="local.jpg" alt="local">
+    <object data="https://example.com/object.swf"></object>
+    <embed src="https://example.com/embed.swf" type="application/x-shockwave-flash">
     <div style="background-image: url('https://example.com/font.woff');"></div>
     <script>
         console.log('Hello from inline script');
+        new Worker("https://example.com/worker.js");
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register("https://example.com/sw.js");
         // The resources below are inside a JS string or single-line comment and must be ignored
         var template = '<img src="https://string.example.com/in-string.jpg">';
         var badFont = 'url("https://string.example.com/in-string.woff")';

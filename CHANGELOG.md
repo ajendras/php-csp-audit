@@ -3,8 +3,11 @@
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+
+## [0.3.0] - 2026-11-25
 ### Added
 
+- Add support for worker-src, frame-ancestors and object-src directives with detection for workers/objects
 - Add --ignore flag (defaults to node_modules,vendor,dist) to skip irrelevant directories during scan
 - extract hostnames only (instead of full paths) for external resources
 

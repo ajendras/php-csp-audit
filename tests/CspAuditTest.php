@@ -18,7 +18,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'self'; frame-ancestors 'self';";
         $this->assertEquals($expected, $output);
     }
 
@@ -28,7 +28,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self' 'unsafe-inline' https://example.com; style-src 'self' 'unsafe-inline' https://example.com; img-src 'self' data: https://example.com local.jpg; font-src 'self' https://example.com; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self' 'unsafe-inline' https://example.com; style-src 'self' 'unsafe-inline' https://example.com; img-src 'self' data: https://example.com local.jpg; font-src 'self' https://example.com; connect-src 'self'; worker-src 'self' https://example.com; object-src 'self' https://example.com; frame-ancestors 'self';";
         $this->assertEquals($expected, $output);
     }
 
@@ -52,6 +52,9 @@ class CspAuditTest extends TestCase
         $this->assertEquals(['https://example.com', 'local.jpg'], $sources['img']);
         $this->assertEquals(['https://example.com'], $sources['font']);
         $this->assertEquals([], $sources['connect']);
+        $this->assertEquals(['https://example.com'], $sources['worker']);
+        $this->assertEquals(['https://example.com'], $sources['object']);
+        $this->assertEquals([], $sources['frame']);
     }
 
     public function testOutputsNonceAndExampleMetaTags()
@@ -79,7 +82,7 @@ class CspAuditTest extends TestCase
         $command = sprintf('php %s --ignore=with-resources %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
         $output = trim(shell_exec($command) ?? '');
 
-        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
+        $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; object-src 'self'; frame-ancestors 'self';";
         $this->assertEquals($expected, $output);
     }
 
@@ -96,7 +99,10 @@ class CspAuditTest extends TestCase
             $sources['style'],
             $sources['img'],
             $sources['font'],
-            $sources['connect']
+            $sources['connect'],
+            $sources['worker'],
+            $sources['object'],
+            $sources['frame']
         );
 
         // Resources present only inside comments or JS strings must not appear

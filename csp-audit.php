@@ -48,7 +48,7 @@ if (count($argv) > 1) {
   }
 }
 $exts = ['html','htm','php','js','css'];
-$sources = ['script'=>[],'style'=>[],'img'=>[],'font'=>[],'connect'=>[]];
+$sources = ['script'=>[],'style'=>[],'img'=>[],'font'=>[],'connect'=>[],'worker'=>[],'object'=>[],'frame'=>[]];
 $hasInlineScript = false;
 $hasInlineStyle = false;
 $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
@@ -60,6 +60,9 @@ foreach ($rii as $file) {
   $clean = stripComments($content, $ext);
   if (preg_match('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', $clean)) $hasInlineScript = true;
   if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $clean)) $hasInlineStyle = true;
+  if (preg_match_all('/new\s+(?:Worker|SharedWorker)\s*\(\s*["\']([^"\']+)["\']/i', $clean, $m)) $sources['worker'] = array_merge($sources['worker'], $m[1]);
+  if (preg_match_all('/navigator\.serviceWorker\.register\s*\(\s*["\']([^"\']+)["\']/i', $clean, $m)) $sources['worker'] = array_merge($sources['worker'], $m[1]);
+  if (preg_match_all('/<(?:object|embed)[^>]*?(?:data|src)=["\']([^"\']+)["\'][^>]*>/i', $clean, $m)) $sources['object'] = array_merge($sources['object'], $m[1]);
   // Remove inline <script> blocks (but not external script tags or styles) so JS strings cannot trigger false resource matches
   $clean = preg_replace('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', '', $clean);
   if (preg_match_all('/<script[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$clean,$m)) $sources['script'] = array_merge($sources['script'],$m[1]);
@@ -84,7 +87,13 @@ if ($nonce) {
     (count($sources['img'])?' '.implode(' ',array_unique($sources['img'])):'').
     "; font-src 'self'".
     (count($sources['font'])?' '.implode(' ',array_unique($sources['font'])):'').
-    "; connect-src 'self';";
+    "; connect-src 'self'".
+    (count($sources['connect'])?' '.implode(' ',array_unique($sources['connect'])):'').
+    "; worker-src 'self'".
+    (count($sources['worker'])?' '.implode(' ',array_unique($sources['worker'])):'').
+    "; object-src 'self'".
+    (count($sources['object'])?' '.implode(' ',array_unique($sources['object'])):'').
+    "; frame-ancestors 'self';";
   echo "Example meta tag:" . PHP_EOL;
   echo '<meta http-equiv="Content-Security-Policy" content="' . $csp . '">' . PHP_EOL . PHP_EOL;
   echo "Add the nonce attribute to your inline <script> and <style> tags:" . PHP_EOL;
@@ -108,6 +117,12 @@ if ($nonce) {
     (count($sources['img'])?' '.implode(' ',array_unique($sources['img'])):'').
     "; font-src 'self'".
     (count($sources['font'])?' '.implode(' ',array_unique($sources['font'])):'').
-    "; connect-src 'self';";
+    "; connect-src 'self'".
+    (count($sources['connect'])?' '.implode(' ',array_unique($sources['connect'])):'').
+    "; worker-src 'self'".
+    (count($sources['worker'])?' '.implode(' ',array_unique($sources['worker'])):'').
+    "; object-src 'self'".
+    (count($sources['object'])?' '.implode(' ',array_unique($sources['object'])):'').
+    "; frame-ancestors 'self';";
   echo $csp.PHP_EOL;
 }

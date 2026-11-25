@@ -23,7 +23,7 @@
 
 Writing accurate CSP headers by hand is error-prone and most developers default to unsafe rules that leave their applications exposed. PHP CSP Audit closes the gap by recursively scanning your PHP project, detecting real resource usage through regex analysis, and emitting a strict, ready-to-paste CSP header.
 
-- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints (extracting only hostnames instead of full paths) and inline `<script>` and `<style>` tags. Ignores resources inside comments or strings to reduce false positives.
+- Automatically discovers external scripts, stylesheets, images, fonts, workers (new Worker, service workers), object and embed resources, connection endpoints (extracting only hostnames instead of full paths) and inline `<script>` and `<style>` tags. Sets `frame-ancestors 'self'`. Ignores resources inside comments or strings to reduce false positives.
 - Produces a tight baseline policy with smart defaults (`'self'`, conditionally `'unsafe-inline'` for scripts and styles, `data:` for images)
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
 - `--json` flag outputs all discovered resources and inline flags as structured JSON
@@ -40,7 +40,7 @@ Writing accurate CSP headers by hand is error-prone and most developers default 
 <table>
 <tr>
 <td align="center">🔍<br><b>Recursive scan</b><br>Walks directories and parses HTML, PHP, JS and CSS files using SPL iterators</td>
-<td align="center">📡<br><b>Resource detection</b><br>Extracts script src, stylesheet links, img src and url() fonts via preg_match_all</td>
+<td align="center">📡<br><b>Resource detection</b><br>Extracts script src, stylesheet links, img src, url() for fonts, Worker/serviceWorker, object/embed via preg_match_all plus frame-ancestors 'self'</td>
 <td align="center">🏗️<br><b>CSP builder</b><br>Outputs default-src 'self' policy with discovered sources appended</td>
 </tr>
 <tr>
@@ -197,7 +197,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Extract hostnames only (instead of full paths) for external resources
 - [x] Add --ignore flag to skip directories like node_modules, vendor, dist
 - [x] Improve regexes to avoid matching inside comments or strings
-- [ ] Add support for worker-src, frame-ancestors and object-src directives
+- [x] Add support for worker-src, frame-ancestors and object-src directives
 - [ ] Write a proper man-page style help output when no argument is given
 - [ ] Add example GitHub Action that runs the scanner on every push
 - [ ] Update README with real before/after CSP examples and security impact
