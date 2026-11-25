@@ -126,10 +126,32 @@ echo "Header set Content-Security-Policy \"$(./csp-audit.php /var/www/app | tr -
 
 <details><summary>Integrating into CI (GitHub Actions example)</summary>
 
+Create `.github/workflows/csp-audit.yml` with the following content to run the scanner on every push and PR:
+
 ```yaml
-- name: Generate CSP
-  run: ./csp-audit.php . > $GITHUB_WORKSPACE/csp.txt
+name: CSP Audit
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Run CSP Audit
+        run: php csp-audit.php .
 ```
+
+This workflow will execute the scanner and display the generated CSP in the GitHub Actions logs. Useful for monitoring which resources are being used as your codebase evolves.
 </details>
 
 ## 🛠 Configuration
@@ -178,6 +200,9 @@ The entire tool lives in a single self-contained `csp-audit.php` file. It uses P
 │       └── with-resources/
 │           └── index.html
 └── .github/
+    ├── workflows/
+    │   ├── ci.yml
+    │   └── csp-audit.yml         # Runs the scanner on every push
     ├── ISSUE_TEMPLATE/
     │   ├── bug_report.md
     │   └── feature_request.md
@@ -206,7 +231,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Improve regexes to avoid matching inside comments or strings
 - [x] Add support for worker-src, frame-ancestors and object-src directives
 - [x] Write a proper man-page style help output when no argument is given
-- [ ] Add example GitHub Action that runs the scanner on every push
+- [x] Add example GitHub Action that runs the scanner on every push
 - [ ] Update README with real before/after CSP examples and security impact
 - [ ] Add connect-src detection by scanning for fetch, XMLHttpRequest and EventSource patterns
 

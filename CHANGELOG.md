@@ -7,6 +7,10 @@ All notable changes to this project are documented here, following [Keep a Chang
 
 - print comprehensive man-page style help on no args or --help
 
+### Changed
+
+- Add example GitHub Action workflow and update README with full usage
+
 ## [0.3.0] - 2026-11-25
 ### Added
 
