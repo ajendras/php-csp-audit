@@ -16,6 +16,15 @@
     <div style="background-image: url('https://example.com/font.woff');"></div>
     <script>
         console.log('Hello from inline script');
+        // The resources below are inside a JS string or single-line comment and must be ignored
+        var template = '<img src="https://string.example.com/in-string.jpg">';
+        var badFont = 'url("https://string.example.com/in-string.woff")';
+        // url('https://commented.com/font.woff')
     </script>
+    <!-- Ignored resources inside HTML comment:
+    <script src="https://commented.com/app.js"></script>
+    <link href="https://commented.com/styles.css" rel="stylesheet">
+    <img src="https://commented.com/image.png">
+    -->
 </body>
 </html>

@@ -17,6 +17,18 @@ function shouldIgnore($pathname, $ignores) {
   return false;
 }
 
+function stripComments($content, $ext) {
+  // Remove HTML comments to prevent matching resources or inline tags inside them
+  $content = preg_replace('~<!--[\s\S]*?-->~', '', $content);
+  // Remove CSS comments
+  $content = preg_replace('~/\*[\s\S]*?\*/~', '', $content);
+  if (in_array($ext, ['js', 'php'])) {
+    // Remove single-line JS/PHP comments (approximate - may affect // inside string literals on same line)
+    $content = preg_replace('~//.*$~m', '', $content);
+  }
+  return $content;
+}
+
 $dir = getcwd();
 $json = false;
 $nonce = false;
@@ -44,12 +56,16 @@ foreach ($rii as $file) {
   if ($file->isDir() || !in_array($file->getExtension(),$exts)) continue;
   if (shouldIgnore($file->getPathname(), $ignores)) continue;
   $content = file_get_contents($file->getPathname());
-  if (preg_match_all('/<script[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$content,$m)) $sources['script'] = array_merge($sources['script'],$m[1]);
-  if (preg_match_all('/<link[^>]*href=["\']([^"\']+)["\'][^>]*rel=["\']stylesheet["\'][^>]*>/i',$content,$m)) $sources['style'] = array_merge($sources['style'],$m[1]);
-  if (preg_match_all('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$content,$m)) $sources['img'] = array_merge($sources['img'],$m[1]);
-  if (preg_match_all('/url\(["\']?([^"\')]+)["\']?\)/i',$content,$m)) $sources['font'] = array_merge($sources['font'],$m[1]);
-  if (preg_match('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', $content)) $hasInlineScript = true;
-  if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $content)) $hasInlineStyle = true;
+  $ext = $file->getExtension();
+  $clean = stripComments($content, $ext);
+  if (preg_match('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', $clean)) $hasInlineScript = true;
+  if (preg_match('/<style\b[^>]*>.*?<\/style>/is', $clean)) $hasInlineStyle = true;
+  // Remove inline <script> blocks (but not external script tags or styles) so JS strings cannot trigger false resource matches
+  $clean = preg_replace('/<script\b(?![^>]*\s+src\s*=)[^>]*>.*?<\/script>/is', '', $clean);
+  if (preg_match_all('/<script[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$clean,$m)) $sources['script'] = array_merge($sources['script'],$m[1]);
+  if (preg_match_all('/<link[^>]*href=["\']([^"\']+)["\'][^>]*rel=["\']stylesheet["\'][^>]*>/i',$clean,$m)) $sources['style'] = array_merge($sources['style'],$m[1]);
+  if (preg_match_all('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i',$clean,$m)) $sources['img'] = array_merge($sources['img'],$m[1]);
+  if (preg_match_all('/url\(["\']?([^"\')]+)["\']?\)/i',$clean,$m)) $sources['font'] = array_merge($sources['font'],$m[1]);
 }
 $sources = array_map('array_unique', $sources);
 $sources = array_map(function($list) {

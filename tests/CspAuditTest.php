@@ -82,4 +82,25 @@ class CspAuditTest extends TestCase
         $expected = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self';";
         $this->assertEquals($expected, $output);
     }
+
+    public function testDoesNotMatchInsideCommentsOrStrings()
+    {
+        $fixtureDir = __DIR__ . '/fixtures/with-resources';
+        $command = sprintf('php %s --json %s', escapeshellarg($this->scriptPath), escapeshellarg($fixtureDir));
+        $output = trim(shell_exec($command) ?? '');
+        $data = json_decode($output, true);
+
+        $sources = $data['sources'];
+        $allSources = array_merge(
+            $sources['script'],
+            $sources['style'],
+            $sources['img'],
+            $sources['font'],
+            $sources['connect']
+        );
+
+        // Resources present only inside comments or JS strings must not appear
+        $this->assertNotContains('https://commented.com', $allSources);
+        $this->assertNotContains('https://string.example.com', $allSources);
+    }
 }

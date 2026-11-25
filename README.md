@@ -23,7 +23,7 @@
 
 Writing accurate CSP headers by hand is error-prone and most developers default to unsafe rules that leave their applications exposed. PHP CSP Audit closes the gap by recursively scanning your PHP project, detecting real resource usage through regex analysis, and emitting a strict, ready-to-paste CSP header.
 
-- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints (extracting only hostnames instead of full paths) and inline `<script>` and `<style>` tags
+- Automatically discovers external scripts, stylesheets, images, fonts, connection endpoints (extracting only hostnames instead of full paths) and inline `<script>` and `<style>` tags. Ignores resources inside comments or strings to reduce false positives.
 - Produces a tight baseline policy with smart defaults (`'self'`, conditionally `'unsafe-inline'` for scripts and styles, `data:` for images)
 - Zero-configuration, single-file PHP 8+ script — perfect for CI pipelines and pre-deploy checks
 - `--json` flag outputs all discovered resources and inline flags as structured JSON
@@ -148,7 +148,7 @@ flowchart TD
     Builder --> Echo[echo $csp]
 ```
 
-The entire tool lives in a single self-contained `csp-audit.php` file. It uses PHP’s built-in filesystem and regex functions to discover external resources and detect inline `<script>` and `<style>` tags, then constructs a CSP header that balances security with functionality using opinionated but practical defaults.
+The entire tool lives in a single self-contained `csp-audit.php` file. It uses PHP’s built-in filesystem and regex functions to discover external resources and detect inline `<script>` and `<style>` tags, then constructs a CSP header that balances security with functionality using opinionated but practical defaults. A `stripComments()` helper preprocesses content (removing HTML comments, CSS comments and JS single-line comments) before regex matching to avoid false positives from comments and strings.
 
 ## 📁 Project structure
 
@@ -196,7 +196,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Support --nonce flag that prints a random nonce and example meta tags
 - [x] Extract hostnames only (instead of full paths) for external resources
 - [x] Add --ignore flag to skip directories like node_modules, vendor, dist
-- [ ] Improve regexes to avoid matching inside comments or strings
+- [x] Improve regexes to avoid matching inside comments or strings
 - [ ] Add support for worker-src, frame-ancestors and object-src directives
 - [ ] Write a proper man-page style help output when no argument is given
 - [ ] Add example GitHub Action that runs the scanner on every push
