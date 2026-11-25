@@ -29,6 +29,80 @@ function stripComments($content, $ext) {
   return $content;
 }
 
+function showHelp() {
+echo <<<'HELP'
+csp-audit.php(1)         PHP CSP Audit Manual         csp-audit.php(1)
+
+NAME
+       csp-audit.php - discover used resources and emit a strict CSP header
+
+SYNOPSIS
+       ./csp-audit.php [--help | -h] [--json] [--nonce]
+                       [--ignore=LIST] [DIRECTORY]
+
+DESCRIPTION
+       Zero-dependency PHP CLI that recursively scans a project for HTML, PHP,
+       JavaScript and CSS files. It extracts references to external scripts,
+       stylesheets, images, fonts, workers, objects/embeds and connect
+       endpoints (using only the hostname). It also detects inline <script>
+       and <style> blocks (ignoring those inside comments or strings).
+
+       A strict CSP string is built using 'self' defaults, 'unsafe-inline'
+       only when inline content is present, data: for images, and
+       frame-ancestors 'self'.
+
+       When no argument is supplied this help text is displayed.
+
+OPTIONS
+       -h, --help
+              Print this man-page style help and exit.
+
+       --json
+              Output a JSON document describing all discovered sources per
+              directive plus the two inline booleans. The JSON is pretty-
+              printed and does not contain duplicate or commented-out
+              resources.
+
+       --nonce
+              Print a cryptographically random nonce (base64url), a full
+              example CSP meta tag that uses that nonce for any inline
+              script or style instead of 'unsafe-inline', and a short
+              reminder how to add the nonce attribute to your tags.
+
+       --ignore=LIST
+              Skip any directories whose path contains one of the listed
+              names. Default list is node_modules,vendor,dist. Prevents
+              third-party code from affecting the generated policy.
+
+EXAMPLES
+       ./csp-audit.php .
+              Scan current directory and print CSP.
+
+       ./csp-audit.php --ignore=build,dist /var/www/my-app
+              Custom ignore list.
+
+       ./csp-audit.php --json .
+              Machine readable output.
+
+       ./csp-audit.php --nonce .
+              Nonce-based CSP example.
+
+SEE ALSO
+       The project repository:
+         https://github.com/ajendras/php-csp-audit
+
+       CSP reference on MDN:
+         https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+
+csp-audit.php(1)               2024               csp-audit.php(1)
+HELP;
+}
+
+if (count($argv) === 1 || in_array('--help', $argv) || in_array('-h', $argv)) {
+  showHelp();
+  exit(0);
+}
+
 $dir = getcwd();
 $json = false;
 $nonce = false;

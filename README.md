@@ -29,6 +29,7 @@ Writing accurate CSP headers by hand is error-prone and most developers default 
 - `--json` flag outputs all discovered resources and inline flags as structured JSON
 - `--nonce` flag that prints a random nonce and example meta tags for using nonces with inline content
 - `--ignore` flag to skip directories like `node_modules`, `vendor` and `dist`
+- Displays a detailed man-page style help when run with no arguments or with `--help`
 - Helps prevent XSS by showing you exactly what your application actually loads
 
 ## 🎬 Demo
@@ -66,14 +67,20 @@ php -l csp-audit.php
 ./csp-audit.php .
 ```
 
-The script scans the current directory (or the path you provide) and prints a complete CSP header.
+The script scans the current directory when `.` (or another path) is provided and prints a complete CSP header. Running with no arguments displays the full man-page style help.
 
 ## 🧰 Usage
+
+Show the help:
+
+```bash
+./csp-audit.php --help
+```
 
 Scan the current project and see the generated policy:
 
 ```bash
-./csp-audit.php
+./csp-audit.php .
 ```
 
 Target a specific directory:
@@ -133,7 +140,7 @@ The scanner skips `node_modules`, `vendor` and `dist` directories by default. Yo
 ./csp-audit.php --ignore=node_modules,vendor,dist,build,cache .
 ```
 
-This ensures only your own code affects the generated CSP policy.
+Run the tool with no arguments or `--help` to see the full man-page style documentation with all options, examples and description. This ensures only your own code affects the generated CSP policy.
 
 ## 🧩 Architecture
 
@@ -198,7 +205,7 @@ The original `php -l csp-audit.php` syntax check is still performed by the CI wo
 - [x] Add --ignore flag to skip directories like node_modules, vendor, dist
 - [x] Improve regexes to avoid matching inside comments or strings
 - [x] Add support for worker-src, frame-ancestors and object-src directives
-- [ ] Write a proper man-page style help output when no argument is given
+- [x] Write a proper man-page style help output when no argument is given
 - [ ] Add example GitHub Action that runs the scanner on every push
 - [ ] Update README with real before/after CSP examples and security impact
 - [ ] Add connect-src detection by scanning for fetch, XMLHttpRequest and EventSource patterns

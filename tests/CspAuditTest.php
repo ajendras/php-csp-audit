@@ -12,6 +12,24 @@ class CspAuditTest extends TestCase
         $this->assertFileExists($this->scriptPath, 'csp-audit.php must exist for tests');
     }
 
+    public function testPrintsManPageHelpWhenNoArgumentGiven()
+    {
+        $command = sprintf('php %s', escapeshellarg($this->scriptPath));
+        $output = shell_exec($command) ?? '';
+
+        $this->assertStringContainsString('NAME', $output);
+        $this->assertStringContainsString('SYNOPSIS', $output);
+        $this->assertStringContainsString('DESCRIPTION', $output);
+        $this->assertStringContainsString('OPTIONS', $output);
+        $this->assertStringContainsString('csp-audit.php(1)', $output);
+        $this->assertStringContainsString('--json', $output);
+        $this->assertStringContainsString('--nonce', $output);
+        $this->assertStringContainsString('--ignore=LIST', $output);
+        $this->assertStringContainsString('--help', $output);
+        $this->assertStringContainsString('When no argument is supplied this help text is displayed', $output);
+        $this->assertStringContainsString('Content-Security-Policy', $output);
+    }
+
     public function testGeneratesDefaultCspForEmptyFixture()
     {
         $fixtureDir = __DIR__ . '/fixtures/empty';

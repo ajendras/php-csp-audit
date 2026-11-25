@@ -3,6 +3,9 @@
 All notable changes to this project are documented here, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
+### Added
+
+- print comprehensive man-page style help on no args or --help
 
 ## [0.3.0] - 2026-11-25
 ### Added
